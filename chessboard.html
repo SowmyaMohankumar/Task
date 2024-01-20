@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8-Queens Puzzle</title>
+  <style>
+    .chessboard {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      width: 400px;
+      height: 400px;
+      margin: auto;
+    }
+  
+    .cell {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid #000;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+    
+    .white {
+      background-color: #f0d9b5;
+    }
+    
+    .black {
+      background-color: #b58863;
+    }
+    
+    .cell.queen {
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chessboard" id="chessboard"></div>
+<button onclick="solveQueens()">Solve Queens</button>
+
+<script>
+  let board = new Array(8).fill(0).map(() => new Array(8).fill(0));
+
+  function updateBoard() {
+    const chessboard = document.getElementById('chessboard');
+    chessboard.innerHTML = '';
+
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+        if ((i + j) % 2 === 0) {
+          cell.classList.add('white');
+        } else {
+          cell.classList.add('black');
+        }
+        if (board[i][j] === 1) {
+          cell.classList.add('queen');
+          cell.innerText = '♛';
+          cell.addEventListener('click', () => moveQueen(i, j));
+        } else {
+          cell.addEventListener('click', () => placeQueen(i, j));
+        }
+        chessboard.appendChild(cell);
+      }
+    }
+  }
+
+  function isSafe(row, col) {
+    for (let i = 0; i < row; i++) {
+      if (board[i][col] === 1) return false; // Check column
+      if (board[i][col - (row - i)] === 1) return false; // Check left diagonal
+      if (board[i][col + (row - i)] === 1) return false; // Check right diagonal
+    }
+    return true;
+  }
+
+  function placeQueen(row, col) {
+    if (!isSafe(row, col)) {
+      alert('Invalid move! Queens cannot threaten each other.');
+      return;
+    }
+
+    board[row][col] = 1;
+    updateBoard();
+
+    const queensPlaced = board.reduce((count, row) => count + row.reduce((sum, cell) => sum + cell, 0), 0);
+    if (queensPlaced === 8) {
+      alert('Congratulations! You have placed all 8 queens successfully.');
+    }
+  }
+
+  function moveQueen(oldRow, oldCol) {
+    board[oldRow][oldCol] = 0;
+    updateBoard();
+  }
+
+  function solveQueensHelper(row) {
+    if (row === 8) {
+      updateBoard();
+      return true;
+    }
+
+    for (let col = 0; col < 8; col++) {
+      if (isSafe(row, col)) {
+        board[row][col] = 1;
+        if (solveQueensHelper(row + 1)) {
+          return true;
+        }
+        board[row][col] = 0; // Backtrack
+      }
+    }
+
+    return false;
+  }
+
+  function solveQueens() {
+    board = new Array(8).fill(0).map(() => new Array(8).fill(0));
+    solveQueensHelper(0);
+  }
+
+  window.onload = updateBoard;
+</script>
+
+</body>
+</html>
